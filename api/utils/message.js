@@ -1,4 +1,5 @@
 const uuidv4 = require('uuid/v4');
+const getViewer = require('../utils/viever');
 
 const MESSAGE_USER = 'user';
 const MESSAGE_VIDEO_IS_PLAYING = 'is-playing';
@@ -11,13 +12,14 @@ const MESSAGE_USER_USERNAME_CHANGE = 'user-username-change';
 const MESSAGE_USER_JOIN = 'user-join';
 const MESSAGE_USER_LEAVE = 'user-leave';
 const MESSAGE_VIDEO_PALAY_ORDER = 'video-play-order';
+const MESSAGE_REORDER = 'reorder';
 
 function createUserMessage(content, user, type) {
   return {
     createdAt: new Date().toString(),
     unique: uuidv4(),
     type: type,
-    user,
+    user: getViewer(user),
     content,
   };
 }
@@ -35,4 +37,5 @@ module.exports = {
   MESSAGE_USER_JOIN,
   MESSAGE_USER_LEAVE,
   MESSAGE_VIDEO_PALAY_ORDER,
+  MESSAGE_REORDER,
 };
