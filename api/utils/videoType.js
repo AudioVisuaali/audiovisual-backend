@@ -6,69 +6,83 @@ const MATCH_YOUTUBE_URL = /(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=
 // const MATCH_YOUTUBE_PLAYLIST = /list=([a-zA-Z0-9_-]+)/;
 const MATCH_SOUNDCLOUD_URL = /(soundcloud\.com|snd\.sc)\/.+$/;
 const MATCH_STREAMABLE_URL = /streamable\.com\/([a-z0-9]+)$/;
+const MATCH_FACEBOOK_URL = /facebook\.com\/([^/?].+\/)?video(s|\.php)[/?].*$/;
+const MATCH_MIXCLOUD_URL = /mixcloud\.com\/([^/]+\/[^/]+)/;
+const MATCH_WISTIA_URL = /(?:wistia\.com|wi\.st)\/(?:medias|embed)\/(.*)$/;
 
 const AUDIO_EXTENSIONS = /\.(m4a|mp4a|mpga|mp2|mp2a|mp3|m2a|m3a|wav|weba|aac|oga|spx)($|\?)/i;
 const VIDEO_EXTENSIONS = /\.(mp4|og[gv]|webm|mov|m4v)($|\?)/i;
 const HLS_EXTENSIONS = /\.(m3u8)($|\?)/i;
 const DASH_EXTENSIONS = /\.(mpd)($|\?)/i;
+const MATCH_DAILYMOTION_URL = /^(?:(?:https?):)?(?:\/\/)?(?:www\.)?(?:(?:dailymotion\.com(?:\/embed)?\/video)|dai\.ly)\/([a-zA-Z0-9]+)(?:_[\w_-]+)?$/;
+
+const matches = [
+  {
+    pattern: MATCH_TWITCH_VIDEO_URL,
+    name: 'twitch',
+  },
+  {
+    pattern: MATCH_TWITCH_CHANNEL_URL,
+    name: 'twitch-live',
+  },
+  {
+    pattern: MATCH_VIMEO_URL,
+    name: 'vimeo',
+  },
+  {
+    pattern: MATCH_VIMEO_FILE_URL,
+    name: 'vimeo',
+  },
+  {
+    pattern: MATCH_YOUTUBE_URL,
+    name: 'youtube',
+  },
+  {
+    pattern: MATCH_SOUNDCLOUD_URL,
+    name: 'soundcloud',
+  },
+  {
+    pattern: MATCH_STREAMABLE_URL,
+    name: 'streamable',
+  },
+  {
+    pattern: AUDIO_EXTENSIONS,
+    name: 'file',
+  },
+  {
+    pattern: VIDEO_EXTENSIONS,
+    name: 'file',
+  },
+  {
+    pattern: HLS_EXTENSIONS,
+    name: 'file',
+  },
+  {
+    pattern: DASH_EXTENSIONS,
+    name: 'file',
+  },
+  {
+    pattern: MATCH_FACEBOOK_URL,
+    name: 'facebook',
+  },
+  {
+    pattern: MATCH_DAILYMOTION_URL,
+    name: 'dailymotion',
+  },
+  {
+    pattern: MATCH_MIXCLOUD_URL,
+    name: 'mixcloud',
+  },
+  {
+    pattern: MATCH_WISTIA_URL,
+    name: 'wistia',
+  },
+];
 
 function getVideoType(url) {
-  const twitchVideoMatch = url.match(MATCH_TWITCH_VIDEO_URL);
-  if (twitchVideoMatch) {
-    return 'twitch';
-  }
+  const match = matches.find(match => url.match(match.pattern));
 
-  const twitchChannelMatch = url.match(MATCH_TWITCH_CHANNEL_URL);
-  if (twitchChannelMatch) {
-    return 'twitch-live';
-  }
-
-  const vimeoURLMatch = url.match(MATCH_VIMEO_URL);
-  if (vimeoURLMatch) {
-    return 'vimeo';
-  }
-
-  const vimeoFileMatch = url.match(MATCH_VIMEO_FILE_URL);
-  if (vimeoFileMatch) {
-    return 'vimeo';
-  }
-
-  const youtubeMatch = url.match(MATCH_YOUTUBE_URL);
-  if (youtubeMatch) {
-    return 'youtube';
-  }
-
-  const soundcloudMatch = url.match(MATCH_SOUNDCLOUD_URL);
-  if (soundcloudMatch) {
-    return 'soundcloud';
-  }
-
-  const streamableMatch = url.match(MATCH_STREAMABLE_URL);
-  if (streamableMatch) {
-    return 'streamable';
-  }
-
-  const audioMatch = url.match(AUDIO_EXTENSIONS);
-  if (audioMatch) {
-    return 'file';
-  }
-
-  const videoMatch = url.match(VIDEO_EXTENSIONS);
-  if (videoMatch) {
-    return 'file';
-  }
-
-  const hlsMatch = url.match(HLS_EXTENSIONS);
-  if (hlsMatch) {
-    return 'file';
-  }
-
-  const dashMatch = url.match(DASH_EXTENSIONS);
-  if (dashMatch) {
-    return 'file';
-  }
-
-  return null;
+  return match ? match.name : null;
 }
 
 module.exports = getVideoType;
