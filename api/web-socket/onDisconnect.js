@@ -7,6 +7,8 @@ function onDisconnect(socket, seek) {
   const user = socket.getVisualsUser(socket.id);
   const room = socket.getVisualsRoom(roomUnique);
 
+  if (!user) return;
+
   console.log(
     `[${roomUnique}] Requested ${WS_TYPES.DISCONNECT} [${socket.id}(${user.username})]`
   );
