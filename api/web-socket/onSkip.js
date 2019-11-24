@@ -1,6 +1,9 @@
 const messageUtil = require('../utils/message');
 const WS_TYPES = require('./wsTypes');
 
+const randomIndexFromPlaylist = room =>
+  Math.floor(Math.random() * room.videos.playlist.length);
+
 function onSkip(socket, currentlyPlayingVideoUnique) {
   const { roomUnique } = socket.handshake.query;
   console.log(`[${roomUnique}] Requested ${WS_TYPES.SKIP}`);
@@ -17,8 +20,10 @@ function onSkip(socket, currentlyPlayingVideoUnique) {
 
   // Next video exists
   if (playlist.length) {
-    room.videos.playing = room.videos.playlist[0];
-    room.videos.playlist.splice(0, 1);
+    const isLinear = room.videos.playOrder === 'linear';
+    const nextItemPosition = isLinear ? 0 : randomIndexFromPlaylist(room);
+    room.videos.playing = room.videos.playlist[nextItemPosition];
+    room.videos.playlist.splice(nextItemPosition, 1);
   } else {
     room.videos.playing = null;
   }
