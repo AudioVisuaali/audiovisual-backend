@@ -1,5 +1,6 @@
 const MATCH_TWITCH_VIDEO_URL = /(?:www\.|go\.)?twitch\.tv\/videos\/(\d+)($|\?)/;
 const MATCH_TWITCH_CHANNEL_URL = /(?:www\.|go\.)?twitch\.tv\/([a-z0-9_]+)($|\?)/;
+const MATCH_TWITCH_CLIP_URL = /(?:clips\.)?twitch\.tv\/([a-zA-Z0-9_]+)($|\?)/;
 const MATCH_VIMEO_URL = /vimeo\.com\/.+/;
 const MATCH_VIMEO_FILE_URL = /vimeo\.com\/external\/[0-9]+\..+/;
 const MATCH_YOUTUBE_URL = /(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))((\w|-){11})|youtube\.com\/playlist\?list=/;
@@ -24,6 +25,10 @@ const matches = [
   {
     pattern: MATCH_TWITCH_CHANNEL_URL,
     name: 'twitch-live',
+  },
+  {
+    pattern: MATCH_TWITCH_CLIP_URL,
+    name: 'twitch-clip',
   },
   {
     pattern: MATCH_VIMEO_URL,

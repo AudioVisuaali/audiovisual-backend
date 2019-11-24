@@ -4,6 +4,7 @@ const getVideoType = require('./videoType');
 
 const MATCH_TWITCH_CHANNEL_URL = /(?:www\.|go\.)?twitch\.tv\/([a-z0-9_]+)($|\?)/;
 const MATCH_TWITCH_VIDEO_URL = /(?:www\.|go\.)?twitch\.tv\/videos\/(\d+)($|\?)/;
+const MATCH_TWITCH_CLIP_URL = /(?:clips\.)?twitch\.tv\/([a-zA-Z0-9_]+)($|\?)/;
 
 const twitchHeaders = {
   headers: {
@@ -28,6 +29,13 @@ const twitchVideoAddr = url => {
   return `https://api.twitch.tv/kraken/videos/${video[1]}`;
 };
 
+const twitchClipAddr = url => {
+  const video = url.match(MATCH_TWITCH_CLIP_URL);
+  if (!video) return;
+
+  return `https://api.twitch.tv/kraken/clips/${video[1]}`;
+};
+
 function createVideo(videoInformation, addedBy) {
   const video = {
     url: videoInformation.url,
@@ -39,6 +47,7 @@ function createVideo(videoInformation, addedBy) {
       channel: null,
       video: null,
     },
+    repeat: videoInformation,
     addedBy,
   };
 
@@ -101,6 +110,23 @@ function createVideo(videoInformation, addedBy) {
         video.thumbnail = preview.large;
         video.title = title;
         video.links.channel = channel.url;
+        video.links.video = url;
+        return Promise.resolve(video);
+      })
+      .catch(() => Promise.resolve(video));
+  }
+
+  if (videoType === 'twitch-clip') {
+    return axios
+      .get(twitchClipAddr(videoInformation.url), twitchHeaders)
+      .then(resp => {
+        if (!resp.data) return Promise.resolve(video);
+        const { broadcaster, curator, title, url, thumbnails } = resp.data;
+        video.url = thumbnails.medium.split('-preview')[0] + '.mp4';
+        video.channel = broadcaster.display_name;
+        video.thumbnail = thumbnails.medium;
+        video.title = title;
+        video.links.channel = curator.channel_url;
         video.links.video = url;
         return Promise.resolve(video);
       })
