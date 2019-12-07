@@ -3,7 +3,6 @@ const WS_TYPES = require('./wsTypes');
 
 function onUserMessage(socket, message) {
   const { roomUnique } = socket.handshake.query;
-
   const user = socket.getVisualsUser(socket.id);
   const room = socket.getVisualsRoom(roomUnique);
 

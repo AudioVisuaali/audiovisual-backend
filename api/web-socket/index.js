@@ -23,6 +23,7 @@ class WebSocket {
     this.visualUsers = [];
 
     this.handleConnection = this.handleConnection.bind(this);
+    this.applyAuthentication = this.applyAuthentication.bind(this);
     this.sendToRoom = this.sendToRoom.bind(this);
     this.addVisualsRoom = this.addVisualsRoom.bind(this);
     this.getVisualsRoom = this.getVisualsRoom.bind(this);
@@ -31,7 +32,8 @@ class WebSocket {
     this.addVisualsUser = this.addVisualsUser.bind(this);
     this.getVisualsUser = this.getVisualsUser.bind(this);
     this.updateVisualsUser = this.updateVisualsUser.bind(this);
-    this.deleteVisualsUser = this.deleteVisualsUser.bind(this);
+    this.disconnectUser = this.disconnectUser.bind(this);
+    this.wrapAction = this.wrapAction.bind(this);
   }
 
   handleConnection(socket) {
@@ -43,29 +45,49 @@ class WebSocket {
     socket.addVisualsUser = this.addVisualsUser;
     socket.getVisualsUser = this.getVisualsUser;
     socket.updateVisualsUser = this.updateVisualsUser;
-    socket.deleteVisualsUser = this.deleteVisualsUser;
+    socket.disconnectUser = this.disconnectUser;
 
-    socket.on(WS_TYPES.IS_PLAYING, msg => onIsPlaying(socket, msg));
-    socket.on(WS_TYPES.SEEK, msg => onSeek(socket, msg));
-    socket.on(WS_TYPES.SKIP, msg => onSkip(socket, msg));
-    socket.on(WS_TYPES.NEXT_VIDEO, msg => onNextVideo(socket, msg));
-    socket.on(WS_TYPES.ADD_VIDEO, msg => onAddVideo(socket, msg));
-    socket.on(WS_TYPES.REMOVE_VIDEO, msg => onRemoveVideo(socket, msg));
-    socket.on(WS_TYPES.PLAY_ORDER, msg => onPlayOrder(socket, msg));
-    socket.on(WS_TYPES.USER_MESSAGE, msg => onUserMessage(socket, msg));
-    socket.on(WS_TYPES.REORDER, msg => onReorder(socket, msg));
-    socket.on(WS_TYPES.USER_USERNAME_CHANGE, msg =>
-      onUserUsernameChange(socket, msg)
+    socket.on(WS_TYPES.IS_PLAYING, this.wrapAction(socket, onIsPlaying));
+    socket.on(WS_TYPES.SEEK, this.wrapAction(socket, onSeek));
+    socket.on(WS_TYPES.SKIP, this.wrapAction(socket, onSkip));
+    socket.on(WS_TYPES.NEXT_VIDEO, this.wrapAction(socket, onNextVideo));
+    socket.on(WS_TYPES.ADD_VIDEO, this.wrapAction(socket, onAddVideo));
+    socket.on(WS_TYPES.REMOVE_VIDEO, this.wrapAction(socket, onRemoveVideo));
+    socket.on(WS_TYPES.PLAY_ORDER, this.wrapAction(socket, onPlayOrder));
+    socket.on(WS_TYPES.USER_MESSAGE, this.wrapAction(socket, onUserMessage));
+    socket.on(WS_TYPES.REORDER, this.wrapAction(socket, onReorder));
+    socket.on(WS_TYPES.DISCONNECT, this.wrapAction(socket, onDisconnect));
+    socket.on(
+      WS_TYPES.USER_USERNAME_CHANGE,
+      this.wrapAction(onUserUsernameChange)
     );
-    socket.on(WS_TYPES.DISCONNECT, msg => onDisconnect(socket, msg));
+  }
+
+  wrapAction(socket, fnc) {
+    return msg => {
+      try {
+        fnc(socket, msg);
+      } catch (error) {
+        console.error('Error during action', error);
+      }
+    };
   }
 
   start() {
     this.io = socketIo(this.server);
 
-    this.io.use((s, n) => authenticate(s, n, this));
+    this.io.use(this.applyAuthentication);
 
     this.io.on(WS_TYPES.CONNECTION, this.handleConnection);
+  }
+
+  applyAuthentication(s, n) {
+    console.log(typeof s, typeof n);
+    try {
+      authenticate(s, n, this);
+    } catch (error) {
+      console.log('Error during authentication', error);
+    }
   }
 
   sendToRoom(room, type, content) {
@@ -138,26 +160,22 @@ class WebSocket {
     }
   }
 
-  deleteVisualsUser(token, roomUnique = null) {
-    let user;
+  disconnectUser(user, roomUnique = null) {
+    for (let j = 0; j < this.visualRooms.length; j++) {
+      const room = this.visualRooms[j];
 
-    for (let i = 0; i < this.visualUsers.length; i++) {
-      if (this.visualUsers[i].token !== token) continue;
+      if (roomUnique && room.unique !== roomUnique) {
+        continue;
+      }
 
-      if (roomUnique) user = this.visualUsers[i];
-      this.visualUsers.splice(i, 1);
-      break;
-    }
+      for (let k = 0; k < room.viewers.length; k++) {
+        if (room.viewers[k].unique !== user.unique) {
+          continue;
+        }
 
-    if (!roomUnique) return;
-
-    const room = this.getVisualsRoom(roomUnique);
-    for (let i = 0; i < room.viewers.length; i++) {
-      if (room.viewers[i].unique !== user.unique) continue;
-
-      room.viewers.splice(i, 1);
-      this.updateVisualsRoom(roomUnique, room);
-      break;
+        this.visualRooms[j].viewers.splice(k, 1);
+        break;
+      }
     }
   }
 }

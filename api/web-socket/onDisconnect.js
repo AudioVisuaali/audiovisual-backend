@@ -21,7 +21,7 @@ function onDisconnect(socket, seek) {
 
   room.messages.push(messageResponse);
   socket.updateVisualsRoom(roomUnique, room);
-  socket.deleteVisualsUser(user.token, roomUnique);
+  socket.disconnectUser(user, roomUnique);
 
   socket.sendToRoom(roomUnique, WS_TYPES.MESSAGE, messageResponse);
   socket.sendToRoom(roomUnique, WS_TYPES.USER_LEAVE, user.unique);

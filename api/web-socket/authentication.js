@@ -6,24 +6,13 @@ const WS_TYPES = require('./wsTypes');
 
 function authenticate(socket, next, ws) {
   const { token, username, roomUnique } = socket.handshake.query;
-
-  let user;
-
+  console.log('user Connected');
+  const user = createUser(socket.id, username);
   if (token) {
-    const foundUser = ws.getVisualsUser(token, true);
-    if (foundUser) {
-      foundUser.username = username;
-      foundUser.id = socket.id;
-      ws.updateVisualsUser(foundUser.unique, foundUser);
-      user = foundUser;
-    }
-  }
-
-  if (!user) {
-    user = createUser(socket.id, username);
     socket.handshake.token = user.token;
-    ws.addVisualsUser(user);
   }
+  ws.addVisualsUser(user);
+
   const messageResponse = messageUtil.createUserMessage(
     null,
     user,
