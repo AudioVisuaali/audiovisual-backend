@@ -47,20 +47,19 @@ class WebSocket {
     socket.updateVisualsUser = this.updateVisualsUser;
     socket.disconnectUser = this.disconnectUser;
 
-    socket.on(WS_TYPES.IS_PLAYING, this.wrapAction(socket, onIsPlaying));
-    socket.on(WS_TYPES.SEEK, this.wrapAction(socket, onSeek));
-    socket.on(WS_TYPES.SKIP, this.wrapAction(socket, onSkip));
-    socket.on(WS_TYPES.NEXT_VIDEO, this.wrapAction(socket, onNextVideo));
-    socket.on(WS_TYPES.ADD_VIDEO, this.wrapAction(socket, onAddVideo));
-    socket.on(WS_TYPES.REMOVE_VIDEO, this.wrapAction(socket, onRemoveVideo));
-    socket.on(WS_TYPES.PLAY_ORDER, this.wrapAction(socket, onPlayOrder));
-    socket.on(WS_TYPES.USER_MESSAGE, this.wrapAction(socket, onUserMessage));
-    socket.on(WS_TYPES.REORDER, this.wrapAction(socket, onReorder));
-    socket.on(WS_TYPES.DISCONNECT, this.wrapAction(socket, onDisconnect));
-    socket.on(
-      WS_TYPES.USER_USERNAME_CHANGE,
-      this.wrapAction(onUserUsernameChange)
-    );
+    const wrap = fnc => this.wrapAction(socket, fnc);
+
+    socket.on(WS_TYPES.IS_PLAYING, wrap(onIsPlaying));
+    socket.on(WS_TYPES.SEEK, wrap(onSeek));
+    socket.on(WS_TYPES.SKIP, wrap(onSkip));
+    socket.on(WS_TYPES.NEXT_VIDEO, wrap(onNextVideo));
+    socket.on(WS_TYPES.ADD_VIDEO, wrap(onAddVideo));
+    socket.on(WS_TYPES.REMOVE_VIDEO, wrap(onRemoveVideo));
+    socket.on(WS_TYPES.PLAY_ORDER, wrap(onPlayOrder));
+    socket.on(WS_TYPES.USER_MESSAGE, wrap(onUserMessage));
+    socket.on(WS_TYPES.REORDER, wrap(onReorder));
+    socket.on(WS_TYPES.DISCONNECT, wrap(onDisconnect));
+    socket.on(WS_TYPES.USER_USERNAME_CHANGE, wrap(onUserUsernameChange));
   }
 
   wrapAction(socket, fnc) {
@@ -82,7 +81,6 @@ class WebSocket {
   }
 
   applyAuthentication(s, n) {
-    console.log(typeof s, typeof n);
     try {
       authenticate(s, n, this);
     } catch (error) {

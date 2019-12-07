@@ -6,7 +6,7 @@ const WS_TYPES = require('./wsTypes');
 
 function authenticate(socket, next, ws) {
   const { token, username, roomUnique } = socket.handshake.query;
-  console.log('user Connected');
+
   const user = createUser(socket.id, username);
   if (token) {
     socket.handshake.token = user.token;
@@ -40,6 +40,8 @@ function authenticate(socket, next, ws) {
   ws.sendToRoom(roomUnique, WS_TYPES.USER_JOIN, getViewer(user));
   socket.emit(WS_TYPES.USER, user);
   socket.emit(WS_TYPES.ROOM, room);
+
+  console.log(`[${roomUnique}] (${user.username}) Joined Room`);
 
   return next();
 }
