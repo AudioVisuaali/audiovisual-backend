@@ -60,7 +60,7 @@ function createVideo(videoInformation, addedBy) {
   video.type = videoType;
 
   if (videoType === 'file') {
-    if (!video.title) {
+    if (!videoInformation.title) {
       const newTitle = videoInformation.url.split('/').pop();
       const titleSeperated = newTitle.split('.');
       if (titleSeperated.length > 1) {
