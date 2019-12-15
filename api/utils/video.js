@@ -41,7 +41,7 @@ function createVideo(videoInformation, addedBy) {
     url: videoInformation.url,
     unique: uuidv4(),
     thumbnail: null,
-    title: videoInformation.url,
+    title: videoInformation.title || videoInformation.url,
     channel: null,
     links: {
       channel: null,
@@ -65,7 +65,7 @@ function createVideo(videoInformation, addedBy) {
     if (titleSeperated.length > 1) {
       titleSeperated.pop();
     }
-    video.title = titleSeperated;
+    video.title = titleSeperated[0];
   }
 
   if (videoInformation.subtitle) {
