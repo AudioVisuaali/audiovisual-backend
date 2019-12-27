@@ -1,9 +1,17 @@
-const messageUtil = require('../utils/message');
-const WS_TYPES = require('./wsTypes');
+const { createUserMessage, MESSAGE_VIDEO_SEEK } = require('../utils/message');
+const { MESSAGE, SEEK } = require('./wsTypes');
+
+function createTimeline(timelineAction, seeked) {
+  return {
+    ...timelineAction,
+    updatedAt: new Date().getTime(),
+    seeked,
+  };
+}
 
 function onSeek(socket, seek) {
   const { roomUnique } = socket.handshake.query;
-  console.log(`[${roomUnique}] Requested ${WS_TYPES.SEEK}`);
+  console.log(`[${roomUnique}] Requested ${SEEK}`);
 
   const newSeek = parseFloat(seek, 10);
   if (Number.isNaN(newSeek)) {
@@ -13,20 +21,15 @@ function onSeek(socket, seek) {
   const user = socket.getVisualsUser(socket.id);
   const room = socket.getVisualsRoom(roomUnique);
 
-  const messageResponse = messageUtil.createUserMessage(
-    newSeek,
-    user,
-    messageUtil.MESSAGE_VIDEO_SEEK
-  );
+  const messageResponse = createUserMessage(newSeek, user, MESSAGE_VIDEO_SEEK);
 
-  room.timelineAction.updatedAt = new Date().getTime();
-  room.timelineAction.seeked = newSeek;
+  room.timelineAction = createTimeline(room.timelineAction);
 
   room.messages.push(messageResponse);
   socket.updateVisualsRoom(roomUnique, room);
 
-  socket.sendToRoom(roomUnique, WS_TYPES.MESSAGE, messageResponse);
-  socket.sendToRoom(roomUnique, WS_TYPES.SEEK, {
+  socket.sendToRoom(roomUnique, MESSAGE, messageResponse);
+  socket.sendToRoom(roomUnique, SEEK, {
     seek: newSeek,
     timelineAction: room.timelineAction,
   });

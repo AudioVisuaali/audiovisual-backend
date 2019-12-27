@@ -1,14 +1,14 @@
 const messageUtil = require('../utils/message');
-const WS_TYPES = require('./wsTypes');
+const { MESSAGE, REMOVE_VIDEO } = require('./wsTypes');
 
 function onRemoveVideo(socket, videoUnique) {
   const { roomUnique } = socket.handshake.query;
-  console.log(`[${roomUnique}] Requested ${WS_TYPES.REMOVE_VIDEO}`);
+  console.log(`[${roomUnique}] Requested ${REMOVE_VIDEO}`);
 
   const user = socket.getVisualsUser(socket.id);
   const room = socket.getVisualsRoom(roomUnique);
 
-  let newPlaylist = [];
+  const newPlaylist = [];
   let toHistory = null;
   for (let j = 0; j < room.videos.playlist.length; j++) {
     const video = room.videos.playlist[j];
@@ -33,8 +33,8 @@ function onRemoveVideo(socket, videoUnique) {
 
   room.messages.push(messageResponse);
   socket.updateVisualsRoom(roomUnique, room);
-  socket.sendToRoom(roomUnique, WS_TYPES.MESSAGE, messageResponse);
-  socket.sendToRoom(roomUnique, WS_TYPES.REMOVE_VIDEO, {
+  socket.sendToRoom(roomUnique, MESSAGE, messageResponse);
+  socket.sendToRoom(roomUnique, REMOVE_VIDEO, {
     toHistory,
     removeFromQue: videoUnique,
     requestedBy: user,

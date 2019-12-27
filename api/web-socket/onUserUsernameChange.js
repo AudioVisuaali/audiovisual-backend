@@ -1,22 +1,25 @@
-const messageUtil = require('../utils/message');
-const WS_TYPES = require('./wsTypes');
+const {
+  createUserMessage,
+  MESSAGE_USER_USERNAME_CHANGE,
+} = require('../utils/message');
+const { MESSAGE, USER_USERNAME_CHANGE } = require('./wsTypes');
 const getViewer = require('../utils/viever');
 
 function onUserUsernameChange(socket, newName) {
   const { roomUnique } = socket.handshake.query;
-  console.log(`[${roomUnique}] Requested ${WS_TYPES.USER_USERNAME_CHANGE}`);
+  console.log(`[${roomUnique}] Requested ${USER_USERNAME_CHANGE}`);
 
   const user = socket.getVisualsUser(socket.id);
   const room = socket.getVisualsRoom(roomUnique);
 
-  const oldUser = getViewer(Object.assign({}, user));
+  const oldUser = getViewer({ ...user });
   user.username = newName;
   const safeUser = getViewer(user);
 
-  const messageResponse = messageUtil.createUserMessage(
+  const messageResponse = createUserMessage(
     oldUser,
     user,
-    messageUtil.MESSAGE_USER_USERNAME_CHANGE
+    MESSAGE_USER_USERNAME_CHANGE
   );
 
   room.viewers = room.viewers.map(v =>
@@ -25,8 +28,8 @@ function onUserUsernameChange(socket, newName) {
 
   room.messages.push(messageResponse);
   socket.updateVisualsRoom(roomUnique, room);
-  socket.sendToRoom(roomUnique, WS_TYPES.MESSAGE, messageResponse);
-  socket.sendToRoom(roomUnique, WS_TYPES.USER_USERNAME_CHANGE, safeUser);
+  socket.sendToRoom(roomUnique, MESSAGE, messageResponse);
+  socket.sendToRoom(roomUnique, USER_USERNAME_CHANGE, safeUser);
 }
 
 module.exports = onUserUsernameChange;

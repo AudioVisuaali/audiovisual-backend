@@ -1,5 +1,9 @@
-const messageUtil = require('../utils/message');
-const WS_TYPES = require('./wsTypes');
+const {
+  createUserMessage,
+  MESSAGE_VIDEO_IS_PLAYING,
+} = require('../utils/message');
+
+const { MESSAGE, IS_PLAYING } = require('./wsTypes');
 
 function getSeek(timelineAction) {
   const { seeked, updatedAt, playing } = timelineAction;
@@ -15,9 +19,18 @@ function getSeek(timelineAction) {
   return seeked;
 }
 
+function createTimeline(timelineAction, playing) {
+  return {
+    ...timelineAction,
+    updatedAt: new Date().getTime(),
+    seeked: getSeek(timelineAction),
+    playing,
+  };
+}
+
 function onIsPlaying(socket, isPlaying) {
   const { roomUnique } = socket.handshake.query;
-  console.log(`[${roomUnique}] Requested ${WS_TYPES.IS_PLAYING}`);
+  console.log(`[${roomUnique}] Requested ${IS_PLAYING}`);
 
   if (typeof isPlaying !== 'boolean') {
     return;
@@ -26,22 +39,20 @@ function onIsPlaying(socket, isPlaying) {
   const user = socket.getVisualsUser(socket.id);
   const room = socket.getVisualsRoom(roomUnique);
 
-  const messageResponse = messageUtil.createUserMessage(
+  const messageResponse = createUserMessage(
     isPlaying,
     user,
-    messageUtil.MESSAGE_VIDEO_IS_PLAYING
+    MESSAGE_VIDEO_IS_PLAYING
   );
 
-  room.timelineAction.seeked = getSeek(room.timelineAction);
-  room.timelineAction.updatedAt = new Date().getTime();
-  room.timelineAction.playing = isPlaying;
+  room.timelineAction = createTimeline(room.timelineAction);
 
   room.playing = isPlaying;
   room.messages.push(messageResponse);
   socket.updateVisualsRoom(roomUnique, room);
 
-  socket.sendToRoom(roomUnique, WS_TYPES.MESSAGE, messageResponse);
-  socket.sendToRoom(roomUnique, WS_TYPES.IS_PLAYING, {
+  socket.sendToRoom(roomUnique, MESSAGE, messageResponse);
+  socket.sendToRoom(roomUnique, IS_PLAYING, {
     isPlaying,
     timelineAction: room.timelineAction,
   });

@@ -1,9 +1,9 @@
-const messageUtil = require('../utils/message');
-const WS_TYPES = require('./wsTypes');
+const { createUserMessage, MESSAGE_REORDER } = require('../utils/message');
+const { MESSAGE, REORDER } = require('./wsTypes');
 
 function onReorder(socket, reorder) {
   const { roomUnique } = socket.handshake.query;
-  console.log(`[${roomUnique}] Requested ${WS_TYPES.SEEK}`);
+  console.log(`[${roomUnique}] Requested ${REORDER}`);
 
   const user = socket.getVisualsUser(socket.id);
   const room = socket.getVisualsRoom(roomUnique);
@@ -22,17 +22,17 @@ function onReorder(socket, reorder) {
 
   const reorderMessage = Object.assign({}, reorder);
   reorderMessage.video = video[0];
-  const messageResponse = messageUtil.createUserMessage(
+  const messageResponse = createUserMessage(
     reorderMessage,
     user,
-    messageUtil.MESSAGE_REORDER
+    MESSAGE_REORDER
   );
 
   room.messages.push(messageResponse);
   socket.updateVisualsRoom(roomUnique, room);
 
-  socket.sendToRoom(roomUnique, WS_TYPES.MESSAGE, messageResponse);
-  socket.sendToRoom(roomUnique, WS_TYPES.REORDER, reorder);
+  socket.sendToRoom(roomUnique, MESSAGE, messageResponse);
+  socket.sendToRoom(roomUnique, REORDER, reorder);
 }
 
 module.exports = onReorder;

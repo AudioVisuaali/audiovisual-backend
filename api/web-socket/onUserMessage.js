@@ -1,5 +1,5 @@
-const messageUtil = require('../utils/message');
-const WS_TYPES = require('./wsTypes');
+const { createUserMessage, MESSAGE_USER } = require('../utils/message');
+const { USER_MESSAGE, MESSAGE } = require('./wsTypes');
 
 function onUserMessage(socket, message) {
   const { roomUnique } = socket.handshake.query;
@@ -7,18 +7,14 @@ function onUserMessage(socket, message) {
   const room = socket.getVisualsRoom(roomUnique);
 
   console.log(
-    `[${roomUnique}] Requested ${WS_TYPES.USER_MESSAGE} [${user.unique}(${user.username})]:${message}`
+    `[${roomUnique}] Requested ${USER_MESSAGE} [${user.unique}(${user.username})]:${message}`
   );
 
-  const messageResponse = messageUtil.createUserMessage(
-    message,
-    user,
-    messageUtil.MESSAGE_USER
-  );
+  const messageResponse = createUserMessage(message, user, MESSAGE_USER);
 
   room.messages.push(messageResponse);
   socket.updateVisualsRoom(roomUnique, room);
-  socket.sendToRoom(roomUnique, WS_TYPES.MESSAGE, messageResponse);
+  socket.sendToRoom(roomUnique, MESSAGE, messageResponse);
 }
 
 module.exports = onUserMessage;

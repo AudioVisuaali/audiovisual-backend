@@ -1,12 +1,20 @@
-const messageUtil = require('../utils/message');
-const WS_TYPES = require('./wsTypes');
+const { createUserMessage, MESSAGE_VIDEO_SKIP } = require('../utils/message');
+const { MESSAGE, SKIP } = require('./wsTypes');
 
 const randomIndexFromPlaylist = room =>
   Math.floor(Math.random() * room.videos.playlist.length);
 
+function createTimeline(timelineAction, seeked) {
+  return {
+    ...timelineAction,
+    updatedAt: new Date().getTime(),
+    seeked,
+  };
+}
+
 function onSkip(socket, currentlyPlayingVideoUnique) {
   const { roomUnique } = socket.handshake.query;
-  console.log(`[${roomUnique}] Requested ${WS_TYPES.SKIP}`);
+  console.log(`[${roomUnique}] Requested ${SKIP}`);
 
   const user = socket.getVisualsUser(socket.id);
   const room = socket.getVisualsRoom(roomUnique);
@@ -28,19 +36,18 @@ function onSkip(socket, currentlyPlayingVideoUnique) {
     room.videos.playing = null;
   }
 
-  const messageResponse = messageUtil.createUserMessage(
+  const messageResponse = createUserMessage(
     room.videos.playing,
     user,
-    messageUtil.MESSAGE_VIDEO_SKIP
+    MESSAGE_VIDEO_SKIP
   );
 
-  room.timelineAction.updatedAt = new Date().getTime();
-  room.timelineAction.seeked = 0;
+  room.timelineAction = createTimeline(room.timelineAction);
 
   room.messages.push(messageResponse);
   socket.updateVisualsRoom(roomUnique, room);
-  socket.sendToRoom(roomUnique, WS_TYPES.MESSAGE, messageResponse);
-  socket.sendToRoom(roomUnique, WS_TYPES.SKIP, {
+  socket.sendToRoom(roomUnique, MESSAGE, messageResponse);
+  socket.sendToRoom(roomUnique, SKIP, {
     playing: room.videos.playing,
     timelineAction: room.timelineAction,
   });
