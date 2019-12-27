@@ -34,14 +34,16 @@ function onSkip(socket, currentlyPlayingVideoUnique) {
     messageUtil.MESSAGE_VIDEO_SKIP
   );
 
-  room.timelineAction.updatedAt = new Date().toString();
+  room.timelineAction.updatedAt = new Date().getTime();
   room.timelineAction.seeked = 0;
-  room.timelineAction.action = room.playing ? 'play' : 'true';
 
   room.messages.push(messageResponse);
   socket.updateVisualsRoom(roomUnique, room);
   socket.sendToRoom(roomUnique, WS_TYPES.MESSAGE, messageResponse);
-  socket.sendToRoom(roomUnique, WS_TYPES.SKIP, room.videos);
+  socket.sendToRoom(roomUnique, WS_TYPES.SKIP, {
+    playing: room.videos.playing,
+    timelineAction: room.timelineAction,
+  });
 }
 
 module.exports = onSkip;

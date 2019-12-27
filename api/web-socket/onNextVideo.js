@@ -29,9 +29,8 @@ function onNextVideo(socket, currentlyPlayingVideoUnique) {
     room.videos.playing = null;
   }
 
-  room.timelineAction.updatedAt = new Date().toString();
+  room.timelineAction.updatedAt = new Date().getTime();
   room.timelineAction.seeked = 0;
-  room.timelineAction.action = room.playing ? 'play' : 'true';
 
   if (room.videos.playing) {
     messageResponse = messageUtil.createUserMessage(
@@ -46,7 +45,10 @@ function onNextVideo(socket, currentlyPlayingVideoUnique) {
   if (room.videos.playing) {
     socket.sendToRoom(roomUnique, WS_TYPES.MESSAGE, messageResponse);
   }
-  socket.sendToRoom(roomUnique, WS_TYPES.NEXT_VIDEO, room.videos);
+  socket.sendToRoom(roomUnique, WS_TYPES.NEXT_VIDEO, {
+    playing: room.videos.playing,
+    timelineAction: room.timelineAction,
+  });
 }
 
 module.exports = onNextVideo;

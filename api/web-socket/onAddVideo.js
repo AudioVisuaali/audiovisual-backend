@@ -25,9 +25,8 @@ function onAddvideo(socket, videoInformation) {
       );
     } else {
       room.videos.playing = video;
-      room.timelineAction.updatedAt = new Date().toString();
+      room.timelineAction.updatedAt = new Date().getTime();
       room.timelineAction.seeked = 0;
-      room.timelineAction.action = room.playing ? 'play' : 'true';
 
       messageResponse = messageUtil.createUserMessage(
         room.videos.playing,
@@ -40,7 +39,10 @@ function onAddvideo(socket, videoInformation) {
     socket.updateVisualsRoom(roomUnique, room);
 
     socket.sendToRoom(roomUnique, WS_TYPES.MESSAGE, messageResponse);
-    socket.sendToRoom(roomUnique, WS_TYPES.ADD_VIDEO, room.videos);
+    socket.sendToRoom(roomUnique, WS_TYPES.ADD_VIDEO, {
+      video,
+      timelineAction: room.timelineAction,
+    });
   });
 }
 

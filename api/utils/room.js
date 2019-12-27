@@ -7,7 +7,7 @@ function createRoom(unique, user) {
     timelineAction: {
       updatedAt: new Date().toString(),
       seeked: 0,
-      action: 'pause',
+      playing: false,
     },
     unique: unique || uuidv4().substring(0, 8),
     seek: {
