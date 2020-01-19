@@ -123,7 +123,7 @@ class WebSocket {
     for (let i = 0; i < this.visualRooms.length; i++) {
       if (this.visualRooms[i].unique !== unique) continue;
 
-      this.visualRooms[i].splice(i, 1);
+      this.visualRooms.splice(i, 1);
       break;
     }
   }

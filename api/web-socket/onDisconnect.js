@@ -21,6 +21,23 @@ function onDisconnect(socket, seek) {
 
   socket.sendToRoom(roomUnique, MESSAGE, messageResponse);
   socket.sendToRoom(roomUnique, USER_LEAVE, user.unique);
+
+  if (room.viewers.length) {
+    return;
+  }
+
+  setTimeout(() => {
+    const delMe = socket.getVisualsRoom(roomUnique);
+
+    if (!delMe) {
+      return;
+    }
+
+    if (!delMe.viewers.length) {
+      console.log(`[${roomUnique}] Deleted for inactivity`);
+      socket.deleteVisualsRoom(delMe.unique);
+    }
+  }, process.env.ROOM_DELETE_TIMEOUT);
 }
 
 module.exports = onDisconnect;
