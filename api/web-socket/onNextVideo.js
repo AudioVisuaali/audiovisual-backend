@@ -12,7 +12,8 @@ function createTimeline(timelineAction) {
   };
 }
 
-function onNextVideo(socket, currentlyPlayingVideoUnique) {
+function onNextVideo(socket, data) {
+  const { currentlyPlayingVideoUnique } = data;
   const { roomUnique } = socket.handshake.query;
   console.log(`[${roomUnique}] Requested ${NEXT_VIDEO}`);
 
@@ -52,6 +53,10 @@ function onNextVideo(socket, currentlyPlayingVideoUnique) {
   if (room.videos.playing) {
     socket.sendToRoom(roomUnique, MESSAGE, messageResponse);
   }
+  console.log({
+    playing: room.videos.playing,
+    timelineAction: room.timelineAction,
+  });
   socket.sendToRoom(roomUnique, NEXT_VIDEO, {
     playing: room.videos.playing,
     timelineAction: room.timelineAction,

@@ -1,7 +1,8 @@
 const messageUtil = require('../utils/message');
 const { MESSAGE, REMOVE_VIDEO } = require('./wsTypes');
 
-function onRemoveVideo(socket, videoUnique) {
+function onRemoveVideo(socket, data) {
+  const { videoUnique } = data;
   const { roomUnique } = socket.handshake.query;
   console.log(`[${roomUnique}] Requested ${REMOVE_VIDEO}`);
 

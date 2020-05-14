@@ -14,12 +14,12 @@ function createTimeline(timelineAction) {
   };
 }
 
-function onAddvideo(socket, videoInformation) {
+function onAddvideo(socket, data) {
   const { roomUnique } = socket.handshake.query;
-  console.log(`[${roomUnique}] Requested ${ADD_VIDEO} ${videoInformation.url}`);
+  console.log(`[${roomUnique}] Requested ${ADD_VIDEO} ${data.url}`);
 
   const user = socket.getVisualsUser(socket.id);
-  createVideo(videoInformation, user).then(video => {
+  createVideo(data, user).then(video => {
     if (!video) return;
 
     let messageResponse;

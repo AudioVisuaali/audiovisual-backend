@@ -9,11 +9,12 @@ function createTimeline(timelineAction, seeked) {
   };
 }
 
-function onSeek(socket, seek) {
+function onSeek(socket, data) {
+  const { seekToSeconds } = data;
   const { roomUnique } = socket.handshake.query;
   console.log(`[${roomUnique}] Requested ${SEEK}`);
 
-  const newSeek = parseFloat(seek, 10);
+  const newSeek = parseFloat(seekToSeconds, 10);
   if (Number.isNaN(newSeek)) {
     return;
   }
@@ -23,8 +24,8 @@ function onSeek(socket, seek) {
 
   const messageResponse = createUserMessage(newSeek, user, MESSAGE_VIDEO_SEEK);
 
-  room.timelineAction = createTimeline(room.timelineAction);
-
+  room.timelineAction = createTimeline(room.timelineAction, seekToSeconds);
+  console.log(room.timelineAction);
   room.messages.push(messageResponse);
   socket.updateVisualsRoom(roomUnique, room);
 

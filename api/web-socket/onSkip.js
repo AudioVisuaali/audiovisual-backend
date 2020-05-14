@@ -12,7 +12,8 @@ function createTimeline(timelineAction, seeked) {
   };
 }
 
-function onSkip(socket, currentlyPlayingVideoUnique) {
+function onSkip(socket, data) {
+  const { currentlyPlayingVideoUnique } = data;
   const { roomUnique } = socket.handshake.query;
   console.log(`[${roomUnique}] Requested ${SKIP}`);
 

@@ -10,6 +10,7 @@ const MATCH_STREAMABLE_URL = /streamable\.com\/([a-z0-9]+)$/;
 const MATCH_FACEBOOK_URL = /facebook\.com\/([^/?].+\/)?video(s|\.php)[/?].*$/;
 const MATCH_MIXCLOUD_URL = /mixcloud\.com\/([^/]+\/[^/]+)/;
 const MATCH_WISTIA_URL = /(?:wistia\.com|wi\.st)\/(?:medias|embed)\/(.*)$/;
+const MATCH_TIKTOK_URL = /(?:www\.)?tiktok\.com\/[a-zA-Z0-9_@-]+\/video\/([a-zA-Z0-9_@-]+)($|\?)/;
 
 const AUDIO_EXTENSIONS = /\.(m4a|mp4a|mpga|mp2|mp2a|mp3|m2a|m3a|wav|weba|aac|oga|spx)($|\?)/i;
 const VIDEO_EXTENSIONS = /\.(mp4|og[gv]|webm|mov|m4v)($|\?)/i;
@@ -61,6 +62,10 @@ const matches = [
   {
     pattern: HLS_EXTENSIONS,
     name: 'file',
+  },
+  {
+    pattern: MATCH_TIKTOK_URL,
+    name: 'tik-tok',
   },
   {
     pattern: DASH_EXTENSIONS,

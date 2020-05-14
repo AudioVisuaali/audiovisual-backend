@@ -4,7 +4,8 @@ const {
 } = require('../utils/message');
 const { MESSAGE, PLAY_ORDER } = require('./wsTypes');
 
-function onPlayOrder(socket, order) {
+function onPlayOrder(socket, data) {
+  const { order } = data;
   if (!['linear', 'random'].includes(order)) return;
 
   const { roomUnique } = socket.handshake.query;

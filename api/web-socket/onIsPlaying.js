@@ -19,16 +19,17 @@ function getSeek(timelineAction) {
   return seeked;
 }
 
-function createTimeline(timelineAction, playing) {
+function createTimeline(timelineAction, playing, seeked) {
   return {
     ...timelineAction,
     updatedAt: new Date().getTime(),
-    seeked: getSeek(timelineAction),
+    seeked: seeked, // getSeek(timelineAction),
     playing,
   };
 }
 
-function onIsPlaying(socket, isPlaying) {
+function onIsPlaying(socket, data) {
+  const { isPlaying, played } = data;
   const { roomUnique } = socket.handshake.query;
   console.log(`[${roomUnique}] Requested ${IS_PLAYING}`);
 
@@ -44,8 +45,9 @@ function onIsPlaying(socket, isPlaying) {
     user,
     MESSAGE_VIDEO_IS_PLAYING
   );
-
-  room.timelineAction = createTimeline(room.timelineAction);
+  console.log(room.timelineAction);
+  room.timelineAction = createTimeline(room.timelineAction, isPlaying, played);
+  console.log(room.timelineAction);
 
   room.playing = isPlaying;
   room.messages.push(messageResponse);

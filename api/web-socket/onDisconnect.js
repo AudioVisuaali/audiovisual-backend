@@ -1,7 +1,8 @@
 const { createUserMessage, MESSAGE_USER_LEAVE } = require('../utils/message');
 const { DISCONNECT, MESSAGE, USER_LEAVE } = require('./wsTypes');
 
-function onDisconnect(socket, seek) {
+function onDisconnect(socket, data) {
+  const { seek } = data;
   const { roomUnique } = socket.handshake.query;
 
   const user = socket.getVisualsUser(socket.id);

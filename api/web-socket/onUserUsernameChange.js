@@ -5,7 +5,8 @@ const {
 const { MESSAGE, USER_USERNAME_CHANGE } = require('./wsTypes');
 const getViewer = require('../utils/viever');
 
-function onUserUsernameChange(socket, newName) {
+function onUserUsernameChange(socket, data) {
+  const { newName } = data;
   const { roomUnique } = socket.handshake.query;
   console.log(`[${roomUnique}] Requested ${USER_USERNAME_CHANGE}`);
 

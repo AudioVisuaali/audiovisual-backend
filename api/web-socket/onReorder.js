@@ -1,7 +1,8 @@
 const { createUserMessage, MESSAGE_REORDER } = require('../utils/message');
 const { MESSAGE, REORDER } = require('./wsTypes');
 
-function onReorder(socket, reorder) {
+function onReorder(socket, data) {
+  const { reorder } = data;
   const { roomUnique } = socket.handshake.query;
   console.log(`[${roomUnique}] Requested ${REORDER}`);
 
