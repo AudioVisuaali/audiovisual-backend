@@ -3,6 +3,8 @@ const createRoom = require('../utils/room');
 const getViewer = require('../utils/viever');
 const messageUtil = require('../utils/message');
 const WS_TYPES = require('./wsTypes');
+const users = require('../store/users');
+const rooms = require('../store/rooms');
 
 function authenticate(socket, next, ws) {
   const { token, username, roomUnique } = socket.handshake.query;
@@ -11,7 +13,8 @@ function authenticate(socket, next, ws) {
   if (token) {
     socket.handshake.token = user.token;
   }
-  ws.addVisualsUser(user);
+  users.add(user);
+  // ws.addVisualsUser(user);
 
   const messageResponse = messageUtil.createUserMessage(
     null,
@@ -21,10 +24,13 @@ function authenticate(socket, next, ws) {
 
   let room;
   if (roomUnique) {
-    const foundRoom = ws.getVisualsRoom(roomUnique);
+    const foundRoom = rooms.getById(roomUnique);
+    // ws.getVisualsRoom(roomUnique);
     if (foundRoom) {
       foundRoom.viewers.push(getViewer(user));
       foundRoom.messages.push(messageResponse);
+      foundRoom.videos.history = foundRoom.videos.history.slice(0, 50);
+      foundRoom.messages = foundRoom.messages.slice(0, 100);
       room = foundRoom;
     }
   }
@@ -32,7 +38,7 @@ function authenticate(socket, next, ws) {
   if (!room) {
     room = createRoom(roomUnique, user);
     room.messages.push(messageResponse);
-    ws.addVisualsRoom(room);
+    rooms.add(room);
   }
 
   socket.join(roomUnique);

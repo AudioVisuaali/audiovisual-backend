@@ -4,20 +4,8 @@ const {
 } = require('../utils/message');
 
 const { MESSAGE, IS_PLAYING } = require('./wsTypes');
-
-function getSeek(timelineAction) {
-  const { seeked, updatedAt, playing } = timelineAction;
-
-  if (playing) {
-    const date1 = new Date(updatedAt);
-    const date2 = new Date();
-    const diffTime = Math.abs(date2 - date1);
-    const diffSeconds = Math.floor(diffTime / 1000);
-    return seeked + diffSeconds;
-  }
-
-  return seeked;
-}
+const users = require('../store/users');
+const rooms = require('../store/rooms');
 
 function createTimeline(timelineAction, playing, seeked) {
   return {
@@ -37,21 +25,20 @@ function onIsPlaying(socket, data) {
     return;
   }
 
-  const user = socket.getVisualsUser(socket.id);
-  const room = socket.getVisualsRoom(roomUnique);
+  const user = users.getById(socket.id); // const user = socket.getVisualsUser(socket.id);
+  const room = rooms.getById(roomUnique); // const room = socket.getVisualsRoom(roomUnique);
 
   const messageResponse = createUserMessage(
     isPlaying,
     user,
     MESSAGE_VIDEO_IS_PLAYING
   );
-  console.log(room.timelineAction);
+
   room.timelineAction = createTimeline(room.timelineAction, isPlaying, played);
-  console.log(room.timelineAction);
 
   room.playing = isPlaying;
   room.messages.push(messageResponse);
-  socket.updateVisualsRoom(roomUnique, room);
+  rooms.update(roomUnique, room); // socket.updateVisualsRoom(roomUnique, room);
 
   socket.sendToRoom(roomUnique, MESSAGE, messageResponse);
   socket.sendToRoom(roomUnique, IS_PLAYING, {

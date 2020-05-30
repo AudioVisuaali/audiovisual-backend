@@ -1,12 +1,14 @@
 const { createUserMessage, MESSAGE_USER_LEAVE } = require('../utils/message');
 const { DISCONNECT, MESSAGE, USER_LEAVE } = require('./wsTypes');
+const users = require('../store/users');
+const rooms = require('../store/rooms');
 
 function onDisconnect(socket, data) {
   const { seek } = data;
   const { roomUnique } = socket.handshake.query;
 
-  const user = socket.getVisualsUser(socket.id);
-  const room = socket.getVisualsRoom(roomUnique);
+  const user = users.getById(socket.id);
+  const room = rooms.getById(roomUnique);
 
   if (!user) return;
 
@@ -17,8 +19,10 @@ function onDisconnect(socket, data) {
   const messageResponse = createUserMessage(seek, user, MESSAGE_USER_LEAVE);
 
   room.messages.push(messageResponse);
-  socket.updateVisualsRoom(roomUnique, room);
-  socket.disconnectUser(user, roomUnique);
+  rooms.update(roomUnique, room);
+
+  rooms.update(roomUnique, room); // socket.updateVisualsRoom(roomUnique, room);
+  rooms.deleteUser(user, roomUnique); // socket.disconnectUser(user, roomUnique);
 
   socket.sendToRoom(roomUnique, MESSAGE, messageResponse);
   socket.sendToRoom(roomUnique, USER_LEAVE, user.unique);
@@ -28,7 +32,7 @@ function onDisconnect(socket, data) {
   }
 
   setTimeout(() => {
-    const delMe = socket.getVisualsRoom(roomUnique);
+    const delMe = rooms.getById(roomUnique); // socket.getVisualsRoom(roomUnique);
 
     if (!delMe) {
       return;
@@ -36,7 +40,7 @@ function onDisconnect(socket, data) {
 
     if (!delMe.viewers.length) {
       console.log(`[${roomUnique}] Deleted for inactivity`);
-      socket.deleteVisualsRoom(delMe.unique);
+      rooms.delete(delMe.unique); // socket.deleteVisualsRoom(delMe.unique);
     }
   }, process.env.ROOM_DELETE_TIMEOUT);
 }

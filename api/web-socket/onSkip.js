@@ -1,14 +1,16 @@
 const { createUserMessage, MESSAGE_VIDEO_SKIP } = require('../utils/message');
 const { MESSAGE, SKIP } = require('./wsTypes');
+const users = require('../store/users');
+const rooms = require('../store/rooms');
 
 const randomIndexFromPlaylist = room =>
   Math.floor(Math.random() * room.videos.playlist.length);
 
-function createTimeline(timelineAction, seeked) {
+function createTimeline(timelineAction) {
   return {
     ...timelineAction,
     updatedAt: new Date().getTime(),
-    seeked,
+    seeked: 0,
   };
 }
 
@@ -17,8 +19,8 @@ function onSkip(socket, data) {
   const { roomUnique } = socket.handshake.query;
   console.log(`[${roomUnique}] Requested ${SKIP}`);
 
-  const user = socket.getVisualsUser(socket.id);
-  const room = socket.getVisualsRoom(roomUnique);
+  const user = users.getById(socket.id); // const user = socket.getVisualsUser(socket.id);
+  const room = rooms.getById(roomUnique); // const room = socket.getVisualsRoom(roomUnique);
 
   // Check for same current video
   const { playing, playlist } = room.videos;
@@ -46,7 +48,7 @@ function onSkip(socket, data) {
   room.timelineAction = createTimeline(room.timelineAction);
 
   room.messages.push(messageResponse);
-  socket.updateVisualsRoom(roomUnique, room);
+  rooms.update(roomUnique, room); // socket.updateVisualsRoom(roomUnique, room);
   socket.sendToRoom(roomUnique, MESSAGE, messageResponse);
   socket.sendToRoom(roomUnique, SKIP, {
     playing: room.videos.playing,

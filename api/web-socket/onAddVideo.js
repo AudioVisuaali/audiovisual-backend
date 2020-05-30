@@ -5,6 +5,8 @@ const {
 } = require('../utils/message');
 const createVideo = require('../utils/video');
 const { MESSAGE, ADD_VIDEO } = require('./wsTypes');
+const users = require('../store/users');
+const rooms = require('../store/rooms');
 
 function createTimeline(timelineAction) {
   return {
@@ -18,12 +20,13 @@ function onAddvideo(socket, data) {
   const { roomUnique } = socket.handshake.query;
   console.log(`[${roomUnique}] Requested ${ADD_VIDEO} ${data.url}`);
 
-  const user = socket.getVisualsUser(socket.id);
+  const user = users.getById(socket.id); // socket.getVisualsUser(socket.id);
+
   createVideo(data, user).then(video => {
     if (!video) return;
 
     let messageResponse;
-    const room = socket.getVisualsRoom(roomUnique);
+    const room = rooms.getById(roomUnique);
 
     if (room.videos.playing) {
       room.videos.playlist.push(video);
@@ -41,7 +44,7 @@ function onAddvideo(socket, data) {
     }
 
     room.messages.push(messageResponse);
-    socket.updateVisualsRoom(roomUnique, room);
+    rooms.update(roomUnique, room);
 
     socket.sendToRoom(roomUnique, MESSAGE, messageResponse);
     socket.sendToRoom(roomUnique, ADD_VIDEO, {

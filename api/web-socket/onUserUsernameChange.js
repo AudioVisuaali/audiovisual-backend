@@ -4,14 +4,16 @@ const {
 } = require('../utils/message');
 const { MESSAGE, USER_USERNAME_CHANGE } = require('./wsTypes');
 const getViewer = require('../utils/viever');
+const users = require('../store/users');
+const rooms = require('../store/rooms');
 
 function onUserUsernameChange(socket, data) {
   const { newName } = data;
   const { roomUnique } = socket.handshake.query;
   console.log(`[${roomUnique}] Requested ${USER_USERNAME_CHANGE}`);
 
-  const user = socket.getVisualsUser(socket.id);
-  const room = socket.getVisualsRoom(roomUnique);
+  const user = users.getById(socket.id); // const user = socket.getVisualsUser(socket.id);
+  const room = rooms.getById(roomUnique); // const room = socket.getVisualsRoom(roomUnique);
 
   const oldUser = getViewer({ ...user });
   user.username = newName;
@@ -28,7 +30,7 @@ function onUserUsernameChange(socket, data) {
   );
 
   room.messages.push(messageResponse);
-  socket.updateVisualsRoom(roomUnique, room);
+  rooms.update(roomUnique, room); // socket.updateVisualsRoom(roomUnique, room);
   socket.sendToRoom(roomUnique, MESSAGE, messageResponse);
   socket.sendToRoom(roomUnique, USER_USERNAME_CHANGE, safeUser);
 }

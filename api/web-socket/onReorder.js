@@ -1,13 +1,15 @@
 const { createUserMessage, MESSAGE_REORDER } = require('../utils/message');
 const { MESSAGE, REORDER } = require('./wsTypes');
+const users = require('../store/users');
+const rooms = require('../store/rooms');
 
 function onReorder(socket, data) {
   const { reorder } = data;
   const { roomUnique } = socket.handshake.query;
   console.log(`[${roomUnique}] Requested ${REORDER}`);
 
-  const user = socket.getVisualsUser(socket.id);
-  const room = socket.getVisualsRoom(roomUnique);
+  const user = users.getById(socket.id); // const user = socket.getVisualsUser(socket.id);
+  const room = rooms.getById(roomUnique); // const room = socket.getVisualsRoom(roomUnique);
 
   let video;
   for (let i = 0; i < room.videos.playlist.length; i++) {
@@ -30,7 +32,7 @@ function onReorder(socket, data) {
   );
 
   room.messages.push(messageResponse);
-  socket.updateVisualsRoom(roomUnique, room);
+  rooms.update(roomUnique, room); // socket.updateVisualsRoom(roomUnique, room);
 
   socket.sendToRoom(roomUnique, MESSAGE, messageResponse);
   socket.sendToRoom(roomUnique, REORDER, reorder);

@@ -1,5 +1,7 @@
 const { createUserMessage, MESSAGE_VIDEO_NEXT } = require('../utils/message');
 const { MESSAGE, NEXT_VIDEO } = require('./wsTypes');
+const users = require('../store/users');
+const rooms = require('../store/rooms');
 
 const randomIndexFromPlaylist = room =>
   Math.floor(Math.random() * room.videos.playlist.length);
@@ -15,10 +17,12 @@ function createTimeline(timelineAction) {
 function onNextVideo(socket, data) {
   const { currentlyPlayingVideoUnique } = data;
   const { roomUnique } = socket.handshake.query;
-  console.log(`[${roomUnique}] Requested ${NEXT_VIDEO}`);
+  console.log(
+    `[${roomUnique}] Requested ${NEXT_VIDEO} [${currentlyPlayingVideoUnique}]`
+  );
 
-  const user = socket.getVisualsUser(socket.id);
-  const room = socket.getVisualsRoom(roomUnique);
+  const user = users.getById(socket.id); // const user = socket.getVisualsUser(socket.id);
+  const room = rooms.getById(roomUnique); // const room = socket.getVisualsRoom(roomUnique);
 
   // Check for same current video
   const { playing, playlist } = room.videos;
@@ -48,15 +52,12 @@ function onNextVideo(socket, data) {
     );
     room.messages.push(messageResponse);
   }
-  socket.updateVisualsRoom(roomUnique, room);
+  rooms.update(roomUnique, room); //socket.updateVisualsRoom(roomUnique, room);
 
   if (room.videos.playing) {
     socket.sendToRoom(roomUnique, MESSAGE, messageResponse);
   }
-  console.log({
-    playing: room.videos.playing,
-    timelineAction: room.timelineAction,
-  });
+
   socket.sendToRoom(roomUnique, NEXT_VIDEO, {
     playing: room.videos.playing,
     timelineAction: room.timelineAction,

@@ -29,7 +29,7 @@ function getTikTok(url, video) {
     video.url = getFileAddr(values[1].data) + '?.mp4';
     video.thumbnail = thumbnail_url;
     video.title = title || author_name;
-    video.channel = author_name;
+    video.channel = `@${author_name}`;
     video.links.channel = author_url;
     video.links.video = url;
 
@@ -38,28 +38,3 @@ function getTikTok(url, video) {
 }
 
 module.exports = getTikTok;
-
-/*
-
-.then(resp => {
-      return Promise.resolve(video)
-      console.log(resp);
-      if (!resp.data) return Promise.resolve(video);
-      const { title, author_url, author_name, thumbnail_url } = resp.data;
-      const dom = new JSDOM(resp.data);
-      const { document } = dom.window;
-
-      const videoEl = document.getElementsByClassName(
-        '_embed_player_video-item'
-      )[0];
-
-      video.url = videoEl.src.split('?')[0] + '?.mp4';
-
-      video.thumbnail = thumbnail_url;
-      video.title = title;
-      video.channel = author_name;
-      video.links.channel = author_url;
-      video.links.video = url;
-      return Promise.resolve(video);
-    })
-*/
